@@ -1,20 +1,27 @@
 const express = require("express");
-const multer = require("multer");
 const db = require("./lib/db");
-const Image = require("./lib/imageSchema");
-
+const imageRoute = require("./routes/imageRoute");
 //express init
 const app = express();
 const port = process.env.PORT || 3050;
-
+const cors = require("cors");
+const allowOrigin = ["http://localhost:5173/"];
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin || allowOrigin.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+};
 //middleware
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-
-//multer
-const storage = multer.memoryStorage({});
-const upload = multer({ storage: storage });
+app.use(cors());
+app.use(cors(corsOptions));
 
 //db connection
 db()
@@ -27,40 +34,7 @@ db()
   });
 
 //routes
-//upload images buffer data to mongodb
-app.post("api/upload", upload.single("image"), async (req, res) => {
-  if (!req.file) {
-    return res.status(400).send("No file uploaded.");
-  }
-  const image = new Image({
-    name: req.file.originalname,
-    data: req.file.buffer,
-    contentType: req.file.mimetype,
-  });
-  try {
-    const result = await image.save();
-    return res.send(result);
-  } catch (err) {
-    return res.status(500).send(err);
-  }
-});
-
-//get image from mongodb
-app.get("/api/images", async (req, res) => {
-  try {
-    const images = await Image.find({});
-    const convertImages = images.map((img) => {
-      return {
-        name: img.name,
-        data: img.data.toString("base64"),
-        contentType: img.contentType,
-      };
-    });
-    return res.status(200).send(convertImages);
-  } catch (err) {
-    return res.status(500).send(err);
-  }
-});
+app.use("/api", imageRoute);
 
 //listening
 app.listen(port, () => {
