@@ -5,23 +5,12 @@ const imageRoute = require("./routes/imageRoute");
 const app = express();
 const port = process.env.PORT || 3050;
 const cors = require("cors");
-const allowOrigin = ["http://localhost:5173/"];
-const corsOptions = {
-  origin: (origin, callback) => {
-    if (!origin || allowOrigin.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true,
-};
+
 //middleware
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cors());
-app.use(cors(corsOptions));
 
 //db connection
 db()

@@ -15,13 +15,13 @@ router.post("/upload", upload.single("image"), async (req, res) => {
   });
   try {
     const result = await image.save();
-    return res.send(result);
+    return res.json(result);
   } catch (err) {
     return res.status(500).send(err);
   }
 });
 
-router.get("/api/images", async (req, res) => {
+router.get("/images", async (req, res) => {
   try {
     const images = await Image.find({});
     const convertImages = images.map((img) => {
@@ -31,7 +31,7 @@ router.get("/api/images", async (req, res) => {
         contentType: img.contentType,
       };
     });
-    return res.status(200).send(convertImages);
+    return res.status(200).json(convertImages);
   } catch (err) {
     return res.status(500).send(err);
   }
